@@ -14,21 +14,20 @@ class DateTimeStampManager(models.Manager):
         "get_queryset override"
         query = models.Manager.get_queryset(self)
         ts_now = now()
+ 
+        query = query.filter(models.Q(dts_activate__lte=ts_now))
 
-        activate_lte = models.Q(dts_activate__lte=ts_now)
-        query = query.filter(dts_activate__lte=activate_lte)
-
-        deleted_nil = models.Q(dts_deleted__isnull=False)
-        deleted_gte = models.Q(dts_deleted__gte=ts_now)
-        query = query.filter(deleted_nil | deleted_gte)
+        archived_nil = models.Q(dts_archived__isnull=True)
+        archived_gte = models.Q(dts_archived__gte=ts_now)
+        query = query.filter(archived_nil | archived_gte)
 
         return query
 
 
 class DateTimeStamp(models.Model):
     "Date/Time Stamps"
-    all_objects = models.Manager
-    objects = DateTimeStampManager
+    all_objects = models.Manager()
+    objects = DateTimeStampManager()
     class Meta:
         "Meta section to identify this is abstract"
         abstract = True
